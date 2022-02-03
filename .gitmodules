@@ -1,0 +1,9 @@
+[submodule "TeamMorale_core_"]
+	path = TeamMorale_core_
+	url = https://github.com/hodeiez/TeamMorale_core_
+[submodule "team_morale_frontend"]
+	path = team_morale_frontend
+	url = https://github.com/hodeiez/team_morale_frontend
+[submodule "TeamMoraleEmail"]
+	path = TeamMoraleEmail
+	url = https://github.com/hodeiez/TeamMoraleEmail
