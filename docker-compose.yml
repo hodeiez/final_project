@@ -1,0 +1,67 @@
+version: '3.5'
+#YOU NEED TO PROVIDE SENDGRID PARAMETERS, IF YOU WANT TO USE A TEST USER, use this creds: bat@man.com , 123
+services :
+  db:
+    image: postgres
+    container_name: test_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: pass1234
+      POSTGRES_DB: reactive
+  pubsub:
+    image: redis:latest
+    ports:
+      - 6379:6379
+  team_morale_frontend:
+    image: hodeidocker/team_morale_frontend:latest
+    container_name: team_morale_frontend
+    ports:
+      - 3000:3000
+    environment:
+        REACT_APP_API_ENDPOINT: http://localhost:8080
+        REACT_APP_USING_NETLIFY: 'false'
+  team_morale_core:
+    container_name: team_morale_core
+    image: hodeidocker/team_morale_core:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+        SPRING_PROFILES_ACTIVE: dev
+        DATABASE_URL: jdbc:postgresql://db:5432/reactive
+        DATABASE_USER: admin
+        DATABASE_PASS: pass1234
+        REDIS_HOST: pubsub
+        REDIS_PORT: 6379
+        DATABASE_NAME: reactive
+        DATABASE_HOST: db
+        DATABASE_PORT: 5432
+        SECURITY_KEY: 'McQfTjWnZr4u7x!A%C*F-JaNdRgUkXp2s5v8y/B?E(G+KbPeShVmYq3t6w9z$C&F'
+        SECURITY_ALGORITHM: HS512
+        SECURITY_DURATION: 36000
+        CLIENT_BASE_URL: http://localhost:3000
+        DATABASE_URL_JDBC: jdbc:postgresql://db:5432/reactive
+        DATABASE_URL_R2DBC: jdbc:postgresql://db:5432/reactive
+        
+  team_morale_email:
+    container_name: team_morale_email
+    image: hodeidocker/team_morale_email:latest
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+    environment:
+        SPRING_PROFILES_ACTIVE: dev
+        REDIS_HOST: pubsub
+        REDIS_PORT: 6379
+        SERVER_PORT: 8081
+        TWILLIO_API_KEY: 'SENDGRID_KEY'
+        TWILLIO_TEMPLATE_1: 'SIGNUP_TEMPLATE'
+        TWILLIO_TEMPLATE_2: 'ADDED_TO_TEAM_TEMPLATE'
+        TWILLIO_TEMPLATE_3: 'FORGOT_PASS_TEMPLATE'
+        TWILLIO_FROM_EMAIL: 'SENDGRID_EMAIL_FROM'
+        TWILLIO_BASE_URL: https://api.sendgrid.com/v3/
+        CLIENT_BASE_URL: http://localhost:3000/
